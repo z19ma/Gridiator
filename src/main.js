@@ -9,6 +9,7 @@ const hud = {
   startScreen: document.getElementById('start-screen'),
   gameoverScreen: document.getElementById('gameover-screen'),
   pauseScreen: document.getElementById('pause-screen'),
+  pauseBtn: document.getElementById('pause-btn'),
   finalScore: document.getElementById('final-score'),
   bestScore: document.getElementById('best-score'),
 };

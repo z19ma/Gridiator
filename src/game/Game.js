@@ -42,9 +42,8 @@ export class Game {
     this.scene.background = new THREE.Color(0x0e1420);
     this.scene.fog = new THREE.Fog(0x0e1420, 18, 34);
 
-    const d = 10;
-    const aspect = window.innerWidth / window.innerHeight;
-    this.camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 0.1, 100);
+    const { left, right, top, bottom } = this._frustumHalfExtents();
+    this.camera = new THREE.OrthographicCamera(left, right, top, bottom, 0.1, 100);
     // Camera sits on the +Z/+Y axes only (no X offset), so the grid reads as an
     // axis-aligned rectangle rather than a rotated diamond: north/W is "up" on
     // screen, south/S is "down", west/A is "left", east/D is "right".
@@ -75,13 +74,35 @@ export class Game {
     window.addEventListener('resize', () => this._onResize());
   }
 
-  _onResize() {
-    const d = 10;
+  // Half-extents needed to fit the 13-wide grid without cropping, on
+  // whichever screen axis is more restrictive - letterboxing the other axis
+  // instead of distorting or clipping. The two required extents aren't
+  // equal: horizontally it's just the grid's half-width (6.5, plus margin),
+  // but the camera is pitched down rather than a true top-down view, so grid
+  // depth (Z) is foreshortened onto the screen's vertical axis by ~cos of
+  // the pitch (~0.79 for this camera position) - so less vertical room is
+  // needed than horizontal room, plus margin.
+  _frustumHalfExtents() {
+    const REQ_X = 7.5;
+    const REQ_Y = 6;
     const aspect = window.innerWidth / window.innerHeight;
-    this.camera.left = -d * aspect;
-    this.camera.right = d * aspect;
-    this.camera.top = d;
-    this.camera.bottom = -d;
+    let halfW, halfH;
+    if (aspect >= REQ_X / REQ_Y) {
+      halfH = REQ_Y;
+      halfW = REQ_Y * aspect;
+    } else {
+      halfW = REQ_X;
+      halfH = REQ_X / aspect;
+    }
+    return { left: -halfW, right: halfW, top: halfH, bottom: -halfH };
+  }
+
+  _onResize() {
+    const { left, right, top, bottom } = this._frustumHalfExtents();
+    this.camera.left = left;
+    this.camera.right = right;
+    this.camera.top = top;
+    this.camera.bottom = bottom;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
@@ -114,6 +135,90 @@ export class Game {
         this._handleBoost();
       }
     });
+
+    this.hud.pauseBtn.addEventListener('click', () => {
+      if (this.state === 'playing') this._pauseGame();
+      else if (this.state === 'paused') this._resumeGame();
+    });
+
+    this._initTouch();
+  }
+
+  // Mobile controls: swipe toward a direction to move/thrust that way,
+  // double-tap to boost, single tap to start/restart (there's no keyboard
+  // to fall back on). Pause has its own on-screen button since there's no
+  // Escape key on a touchscreen.
+  _initTouch() {
+    const SWIPE_THRESHOLD = 24;
+    const TAP_MOVE_LIMIT = 12;
+    const DOUBLE_TAP_WINDOW = 300;
+    const DOUBLE_TAP_DIST = 50;
+
+    let startX = 0;
+    let startY = 0;
+    let lastTapTime = 0;
+    let lastTapX = 0;
+    let lastTapY = 0;
+
+    const onTouchStart = (e) => {
+      if (e.target.closest('#pause-btn')) return;
+      const t = e.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+    };
+
+    const onTouchEnd = (e) => {
+      if (e.target.closest('#pause-btn')) return;
+      const t = e.changedTouches[0];
+      if (!t) return;
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist >= SWIPE_THRESHOLD) {
+        const direction =
+          Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'east' : 'west') : (dy > 0 ? 'south' : 'north');
+        this._onDirectionInput(direction);
+        return;
+      }
+
+      if (dist > TAP_MOVE_LIMIT) return; // an indecisive drag - ignore it
+
+      const now = performance.now();
+      const isDoubleTap =
+        now - lastTapTime <= DOUBLE_TAP_WINDOW &&
+        Math.hypot(t.clientX - lastTapX, t.clientY - lastTapY) <= DOUBLE_TAP_DIST;
+
+      if (isDoubleTap) {
+        lastTapTime = 0;
+        this._onBoostInput();
+      } else {
+        lastTapTime = now;
+        lastTapX = t.clientX;
+        lastTapY = t.clientY;
+        this._onTapInput();
+      }
+    };
+
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
+  }
+
+  // Shared entry points for both the swipe gesture and (in principle) any
+  // other non-keyboard input source.
+  _onDirectionInput(direction) {
+    if (this.state === 'start') this._startGame();
+    if (this.state !== 'playing') return;
+    this._handleMove(direction);
+  }
+
+  _onBoostInput() {
+    if (this.state !== 'playing') return;
+    this._handleBoost();
+  }
+
+  _onTapInput() {
+    if (this.state === 'start' || this.state === 'gameover') this._startGame();
   }
 
   _pauseGame() {

@@ -6,15 +6,21 @@ html, body {
   margin: 0;
   height: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
   background: #0e1420;
   font-family: 'Segoe UI', system-ui, sans-serif;
   color: #eaf0fb;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 #scene {
   display: block;
   width: 100vw;
   height: 100vh;
+  touch-action: none;
 }
 
 #hud {
@@ -22,6 +28,7 @@ html, body {
   top: 0;
   left: 0;
   right: 0;
+  z-index: 20;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -69,9 +76,34 @@ html, body {
   transition: width 0.05s linear;
 }
 
+#pause-btn {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #eaf0fb;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#pause-btn:active {
+  background: rgba(255, 255, 255, 0.22);
+}
+
 .overlay {
   position: fixed;
   inset: 0;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;

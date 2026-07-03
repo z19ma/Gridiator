@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Gridiator</title>
   <link rel="icon" href="data:," />
   <link rel="stylesheet" href="./style.css" />
@@ -24,22 +24,23 @@
     </div>
     <div id="lives" class="hearts">♥♥♥</div>
     <div id="boost-bar"><div id="boost-fill"></div></div>
+    <button id="pause-btn" aria-label="Pause">II</button>
   </div>
 
   <div id="start-screen" class="overlay">
     <h1>GRIDIATOR</h1>
-    <p><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> move one grid &mdash; each step is a spear thrust.</p>
-    <p>Press <span class="key">/</span> to boost 3 grids and cut down everything in front of you.</p>
+    <p><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> move one grid, or swipe on mobile &mdash; each step is a spear thrust.</p>
+    <p>Press <span class="key">/</span>, or double-tap, to boost 3 grids and cut down everything in front of you.</p>
     <p>An enemy in front of you is instant death, however it got there. From the back or side it only costs a life. Only the boost dash kills an enemy.</p>
-    <p>Press <span class="key">ESC</span> to pause.</p>
-    <p class="prompt">Press any key to begin</p>
+    <p>Press <span class="key">ESC</span>, or tap the pause button, to pause.</p>
+    <p class="prompt">Press any key, or tap the screen, to begin</p>
   </div>
 
   <div id="gameover-screen" class="overlay hidden">
     <h1>YOU FELL</h1>
     <p>Score: <span id="final-score">0</span></p>
     <p>Best: <span id="best-score">0</span></p>
-    <p class="prompt">Press <span class="key">R</span> to restart</p>
+    <p class="prompt">Press <span class="key">R</span>, or tap the screen, to restart</p>
   </div>
 
   <div id="pause-screen" class="overlay hidden">

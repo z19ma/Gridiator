@@ -14,10 +14,17 @@ Then open http://localhost:8000 in a browser.
 
 ## Controls
 
+**Keyboard:**
 - `W` `A` `S` `D` — move one grid cell in that direction; every move is a spear thrust (has a reload cooldown).
 - `/` — boost 3 grid cells in the direction you're facing, killing every enemy in the path (its own cooldown).
 - `ESC` — pause/resume.
 - `R` — restart after game over.
+
+**Touch (mobile, works in any phone browser, no app needed):**
+- Swipe in a direction — move/thrust that way.
+- Double-tap — boost.
+- Tap the pause button (top center) — pause/resume, since there's no Escape key.
+- Tap the screen — start/restart.
 
 ## Rules
 

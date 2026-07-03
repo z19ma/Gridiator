@@ -33,12 +33,14 @@ the player takes a front hit or their 3 (back/side) lives run out.
   sharp edges), thrust animation, facing rotation, hit-invulnerability blink.
 - `src/game/Enemy.js` — enemy mesh (same sharp-edged box style), movement tweening,
   death (shrink) animation.
-- `src/game/Game.js` — the whole game loop: Three.js scene/camera/renderer setup, input
-  handling, player move/boost resolution, enemy spawning, enemy AI (plain greedy step
-  toward the player, no front-cell avoidance since front is no longer safe for them),
-  front-cell-vs-back/side combat resolution (`_killPlayer` vs `_damagePlayer`), scoring,
-  lives, difficulty ramp over time, HUD updates, game state machine
-  (`start` → `playing` → `paused` → `gameover`).
+- `src/game/Game.js` — the whole game loop: Three.js scene/camera/renderer setup (with an
+  orientation-aware ortho frustum so the grid never gets cropped on narrow phone screens),
+  keyboard *and* touch input (swipe/tap/double-tap, feeding the same `_onDirectionInput` /
+  `_onBoostInput` entry points keyboard uses), player move/boost resolution, enemy
+  spawning, enemy AI (plain greedy step toward the player, no front-cell avoidance since
+  front is no longer safe for them), front-cell-vs-back/side combat resolution
+  (`_killPlayer` vs `_damagePlayer`), scoring, lives, difficulty ramp over time, HUD
+  updates, game state machine (`start` → `playing` → `paused` → `gameover`).
 
 ## Status
 - 2026-07-03: Repo initialized (empty).
@@ -111,6 +113,27 @@ the player takes a front hit or their 3 (back/side) lives run out.
   `.nojekyll` since it's a plain static site with no need for GitHub's Jekyll build step.
   Live at `https://z19ma.github.io/Gridiator/`; redeploys automatically on every push to
   `master`.
+- 2026-07-03: Added mobile support (still purely a web page, no native app) - the game
+  previously couldn't even start on a phone (no keyboard, so nothing ever fired
+  `_startGame()`), and the grid would have clipped on portrait screens since the camera
+  frustum only accounted for landscape aspect ratios. Added: a `window` `touchstart`/
+  `touchend` handler (`_initTouch`) that detects swipes (→ move/thrust, same direction
+  math as WASD), double-taps (→ boost, matches `/`), and single taps (→ start/restart,
+  since there's no generic keypress equivalent on touch); an on-screen pause button since
+  there's no Escape key (had to fix a CSS stacking bug where the full-screen pause overlay
+  - itself `position: fixed`, which always creates its own stacking context - covered the
+  button since `#hud` had no explicit `z-index` of its own to lift its whole subtree above
+  it); and reworked `_frustumHalfExtents()` to require a real per-axis minimum (X: half the
+  grid width, 6.5+margin; Y: less, since the camera's downward pitch foreshortens depth by
+  ~cos(pitch) onto the screen's vertical axis, empirically ~0.79 for this camera position)
+  and letterbox whichever axis the screen is more restrictive on, instead of naively tying
+  both axes to the same constant - this also improved desktop framing (tighter, less dead
+  space) as a side effect. Verified with Playwright using a real mobile viewport + touch
+  emulation (390x844, `has_touch`/`is_mobile`, synthetic `TouchEvent`/`Touch` dispatch):
+  camera frustum extends well past the grid's needed half-extents in both orientations, tap
+  starts the game, swipes move in the correct directions, double-tap raises the boost
+  cooldown, and the pause button toggles pause/resume both ways (this caught the stacking
+  bug - the second tap was unclickable until `#hud`'s z-index was fixed).
 
 ## Notes
 - Grid is 13x13, player starts centered.
