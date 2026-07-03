@@ -4,14 +4,18 @@
 A grid-locked hack-and-slash for the browser, viewed from a cardinal-aligned angled
 top-down camera (grid reads as a rectangle, not a rotated diamond — north/W is up on
 screen, south/S is down, west/A is left, east/D is right). The character can only occupy
-grid cells and always carries a spear. Every `WASD` press is one grid-step *and* a spear
-thrust in that direction; `/` triggers a boost that dashes 3 grid cells and kills every
-enemy in that line. Enemies spawn endlessly from the grid's edges and path toward the
-player, but they can only land a hit from the player's back or sides — if they end up
-directly in front of the spear instead, they die on it. Landing a hit does not kill the
-attacking enemy; the only thing that ever removes an enemy from the board is the player's
-spear (walking thrust, boost, or self-impale on the front cell) — enemies never kill each
-other. Score increases per kill; the run ends when the player's 3 lives run out.
+grid cells and always carries a spear. Every `WASD` press is one grid-step attempt *and*
+a spear thrust in that direction, gated by a "reload" cooldown between moves; `/` triggers
+a boost (its own separate cooldown) that dashes 3 grid cells and kills every enemy in that
+line. Enemies spawn endlessly from the grid's edges and path toward the player. Combat is
+asymmetric by direction: enemies can only land a hit on the player from the back or sides;
+if one ends up directly in front of the spear it dies (self-impale). But a player-initiated
+walking thrust straight into an enemy standing in front is a losing clash — it costs the
+player a life and the enemy survives — only the boosted dash safely kills an enemy head-on.
+Landing a hit never kills the attacker, and nothing but the player's spear or an enemy's
+own front-cell self-impale ever removes an enemy — enemies never kill each other. `ESC`
+pauses/resumes (freezes the game clock, enemy AI, and spawning). Score increases per kill;
+the run ends when the player's 3 lives run out.
 
 ## Stack
 - Vanilla JS ES modules, Three.js loaded via CDN import map (`unpkg`) — **no build step,
@@ -61,6 +65,15 @@ other. Score increases per kill; the run ends when the player's 3 lives run out.
   the previous run had lasted. Now `_startGame()` also resets `lastMoveTime = -999`.
   Verified via a Playwright script that force-triggers game over after simulating a
   90s run, restarts, and confirms the very next keypress moves the player.
+- 2026-07-03: Added pause (`ESC`), made walking straight into a front-facing enemy a
+  losing clash instead of a free kill (only the boost dash kills head-on), and lengthened
+  the move/spear "reload" cooldown from 90ms to 350ms. Pause freezes `elapsed` and the
+  enemy AI/spawn accumulators (they're only advanced in the `state === 'playing'` branch
+  of the render loop), so nothing progresses while paused. Verified all three with
+  Playwright: elapsed stays exactly flat across a paused interval and movement input is
+  ignored while paused; walking into a front enemy drops a life, leaves the enemy alive,
+  and blocks the player's advance; boosting into the same setup still kills the enemy and
+  scores normally.
 
 ## Notes
 - Grid is 13x13, player starts centered.

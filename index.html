@@ -30,7 +30,8 @@
     <h1>GRIDIATOR</h1>
     <p><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> move one grid &mdash; each step is a spear thrust.</p>
     <p>Press <span class="key">/</span> to boost 3 grids and cut down everything in front of you.</p>
-    <p>Enemies can only kill you from the back or the sides. Keep them on your spear.</p>
+    <p>Enemies can only kill you from the back or the sides &mdash; but walking straight into one is a clash you lose. Only the boost kills head-on.</p>
+    <p>Press <span class="key">ESC</span> to pause.</p>
     <p class="prompt">Press any key to begin</p>
   </div>
 
@@ -39,6 +40,11 @@
     <p>Score: <span id="final-score">0</span></p>
     <p>Best: <span id="best-score">0</span></p>
     <p class="prompt">Press <span class="key">R</span> to restart</p>
+  </div>
+
+  <div id="pause-screen" class="overlay hidden">
+    <h1>PAUSED</h1>
+    <p class="prompt">Press <span class="key">ESC</span> to resume</p>
   </div>
 
   <script type="module" src="./src/main.js"></script>

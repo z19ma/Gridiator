@@ -8,6 +8,7 @@ const hud = {
   boostFill: document.getElementById('boost-fill'),
   startScreen: document.getElementById('start-screen'),
   gameoverScreen: document.getElementById('gameover-screen'),
+  pauseScreen: document.getElementById('pause-screen'),
   finalScore: document.getElementById('final-score'),
   bestScore: document.getElementById('best-score'),
 };

@@ -8,7 +8,7 @@ const SCORE_NORMAL_KILL = 10;
 const SCORE_BOOST_KILL = 15;
 const BOOST_RANGE = 3;
 const BOOST_COOLDOWN = 1.4;
-const MOVE_COOLDOWN = 0.09;
+const MOVE_COOLDOWN = 0.35;
 const MAX_ENEMIES = 24;
 const MIN_SPAWN_DIST = 4;
 const HIGHSCORE_KEY = 'gridiator_highscore';
@@ -92,10 +92,18 @@ export class Game {
       const key = e.key.toLowerCase();
       if (['w', 'a', 's', 'd', '/'].includes(key)) e.preventDefault();
 
+      if (key === 'escape') {
+        if (this.state === 'playing') this._pauseGame();
+        else if (this.state === 'paused') this._resumeGame();
+        return;
+      }
+
       if (this.state === 'start') {
         this._startGame();
       } else if (this.state === 'gameover') {
         if (key === 'r') this._startGame();
+        return;
+      } else if (this.state === 'paused') {
         return;
       }
 
@@ -107,6 +115,16 @@ export class Game {
         this._handleBoost();
       }
     });
+  }
+
+  _pauseGame() {
+    this.state = 'paused';
+    this.hud.pauseScreen.classList.remove('hidden');
+  }
+
+  _resumeGame() {
+    this.state = 'playing';
+    this.hud.pauseScreen.classList.add('hidden');
   }
 
   _startGame() {
@@ -127,6 +145,7 @@ export class Game {
     this.state = 'playing';
     this.hud.startScreen.classList.add('hidden');
     this.hud.gameoverScreen.classList.add('hidden');
+    this.hud.pauseScreen.classList.add('hidden');
     this._updateHud();
   }
 
@@ -143,7 +162,13 @@ export class Game {
     if (!inBounds(tx, tz)) return;
 
     const hit = this._enemyAt(tx, tz);
-    if (hit) this._killEnemy(hit, SCORE_NORMAL_KILL);
+    if (hit) {
+      // A plain walking thrust into an enemy standing in front is a spear
+      // clash you lose - only the boosted dash hits hard enough to kill an
+      // enemy head-on. The player doesn't advance; the enemy holds its cell.
+      this._damagePlayer();
+      return;
+    }
     this.player.moveTo(tx, tz);
   }
 
@@ -246,14 +271,14 @@ export class Game {
     if (enemy.gx === front.gx && enemy.gz === front.gz) {
       this._killEnemy(enemy, SCORE_NORMAL_KILL);
     } else {
-      this._damagePlayer(enemy);
+      this._damagePlayer();
     }
   }
 
-  // Landing a hit does not kill the attacker — only the player's spear (a
-  // walking thrust, a boost, or an enemy impaling itself on the front cell)
-  // is ever allowed to remove an enemy from the board.
-  _damagePlayer(attacker) {
+  // Landing a hit never kills the attacker - enemies can never eliminate
+  // each other. An enemy is only ever removed by the player's boost dash,
+  // or by wandering onto the player's stationary front-cell spear tip.
+  _damagePlayer() {
     if (this.player.isInvulnerable()) return;
     this.player.flashHit();
     this.lives -= 1;
