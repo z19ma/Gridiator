@@ -21,9 +21,10 @@ Then open http://localhost:8000 in a browser.
 
 ## Rules
 
-- Any enemy adjacent to you — front, back, or side, whether it walked into you or you walked into it — costs you a life. There's no safe direction to be caught next to one.
-- The boost dash is the only thing that ever kills an enemy. Walking a normal thrust into one just costs you a life instead (and blocks your advance).
+- An enemy in your front cell is instant death — no invulnerability, no second life. It doesn't matter whether you walked into it or it walked into you.
+- An enemy adjacent from the back or a side only costs you a life (with a brief invulnerability window), not the whole run.
+- The boost dash is the only thing that ever kills an enemy and lets you survive a front-on encounter. Walking a normal thrust into one is fatal instead.
 - Enemies never kill each other.
 - Enemies spawn continuously from the grid's edges and get faster/more frequent the longer you survive.
 - Score: +15 per boost kill (the only way to score). High score is saved locally in the browser.
-- You have 3 lives; losing all of them ends the run.
+- You have 3 lives against back/side hits; a front clash ends the run immediately regardless of lives remaining.

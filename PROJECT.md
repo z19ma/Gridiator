@@ -7,13 +7,15 @@ screen, south/S is down, west/A is left, east/D is right). The character can onl
 grid cells and always carries a spear. Every `WASD` press is one grid-step attempt *and*
 a spear thrust in that direction, gated by a "reload" cooldown between moves; `/` triggers
 a boost (its own separate cooldown) that dashes 3 grid cells and kills every enemy in that
-line. Enemies spawn endlessly from the grid's edges and path toward the player. Combat has
-no safe direction: any adjacency between the player and an enemy — front, back, or side,
-whether the player walked into the enemy or the enemy walked into the player — costs the
-player a life. The boost dash is the *only* thing that ever kills an enemy; landing a hit
-never kills the attacker, and enemies never kill each other. `ESC` pauses/resumes (freezes
-the game clock, enemy AI, and spawning). Score only comes from boost kills; the run ends
-when the player's 3 lives run out.
+line. Enemies spawn endlessly from the grid's edges and path toward the player. Combat is
+direction-asymmetric: an enemy in the player's front cell — whether the player walked into
+it or it walked into the player — is instant, certain death (no invulnerability window,
+run over immediately). An enemy adjacent from the back or a side only costs the player a
+life (with a brief invulnerability window). The boost dash is the *only* thing that ever
+kills an enemy and the only way to survive a front-on encounter; landing a hit never kills
+the attacker, and enemies never kill each other. `ESC` pauses/resumes (freezes the game
+clock, enemy AI, and spawning). Score only comes from boost kills; the run ends when either
+the player takes a front hit or their 3 (back/side) lives run out.
 
 ## Stack
 - Vanilla JS ES modules, Three.js loaded via CDN import map (`unpkg`) — **no build step,
@@ -34,8 +36,9 @@ when the player's 3 lives run out.
 - `src/game/Game.js` — the whole game loop: Three.js scene/camera/renderer setup, input
   handling, player move/boost resolution, enemy spawning, enemy AI (plain greedy step
   toward the player, no front-cell avoidance since front is no longer safe for them),
-  combat resolution, scoring, lives, difficulty ramp over time, HUD updates, game state
-  machine (`start` → `playing` → `paused` → `gameover`).
+  front-cell-vs-back/side combat resolution (`_killPlayer` vs `_damagePlayer`), scoring,
+  lives, difficulty ramp over time, HUD updates, game state machine
+  (`start` → `playing` → `paused` → `gameover`).
 
 ## Status
 - 2026-07-03: Repo initialized (empty).
@@ -88,6 +91,18 @@ when the player's 3 lives run out.
   is the only remaining kill path. Verified with Playwright: an enemy placed directly in
   front of the player with zero player input still damages the player (not itself) on the
   next AI tick and survives; boosting into the same setup still kills it and scores.
+- 2026-07-03: User felt front-cell contact resolving as a life-loss-plus-invulnerability-
+  flash "reads as a pause" and asked for an actual kill instead. Split combat resolution
+  back into two paths: `_killPlayer()` (new) — instant game over, no invulnerability check,
+  no mercy — fires whenever an enemy is in the player's front cell, whether the player
+  walked into it (`_handleMove`) or it walked into the player (`_stepEnemyAI` via
+  `_resolveAdjacent`, reintroduced with a front-cell computed from `player.facing`).
+  `_damagePlayer()` (unchanged: costs a life, brief invulnerability) still handles back/side
+  adjacency only. Enemy survives either way; the boost dash remains the only kill path.
+  Verified 4 scenarios with Playwright: walking into a front enemy → instant game over; an
+  enemy walking into the front cell on its own with zero player input → instant game over;
+  an enemy adjacent from the side → costs exactly 1 life, game continues; boosting a front
+  enemy → enemy dies, player takes no damage, game continues.
 
 ## Notes
 - Grid is 13x13, player starts centered.

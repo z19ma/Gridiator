@@ -162,10 +162,10 @@ export class Game {
 
     const hit = this._enemyAt(tx, tz);
     if (hit) {
-      // A plain walking thrust into an enemy standing in front is a spear
-      // clash you lose - only the boosted dash hits hard enough to kill an
-      // enemy head-on. The player doesn't advance; the enemy holds its cell.
-      this._damagePlayer();
+      // Walking a thrust straight into an enemy is a face-to-face clash -
+      // fatal, immediately, no invulnerability window to ride out. Only the
+      // boosted dash kills an enemy head-on and survives the encounter.
+      this._killPlayer();
       return;
     }
     this.player.moveTo(tx, tz);
@@ -231,6 +231,8 @@ export class Game {
 
   _stepEnemyAI() {
     const p = this.player;
+    const facing = DIRECTIONS[p.facing];
+    const front = { gx: p.gx + facing.dx, gz: p.gz + facing.dz };
     const occupied = new Set(this.enemies.filter((e) => !e.dying).map((e) => `${e.gx},${e.gz}`));
 
     for (const enemy of [...this.enemies]) {
@@ -239,11 +241,8 @@ export class Game {
       const dgx = p.gx - enemy.gx;
       const dgz = p.gz - enemy.gz;
 
-      // Adjacent on any side - front, back, or flank - lands a hit on the
-      // player. There's no safe direction to be caught next to an enemy;
-      // the boost dash is the only way to clear one out.
       if (Math.abs(dgx) + Math.abs(dgz) === 1) {
-        this._damagePlayer();
+        this._resolveAdjacent(enemy, front);
         continue;
       }
 
@@ -261,15 +260,32 @@ export class Game {
       occupied.add(`${chosen.gx},${chosen.gz}`);
 
       if (Math.abs(p.gx - chosen.gx) + Math.abs(p.gz - chosen.gz) === 1) {
-        this._damagePlayer();
+        this._resolveAdjacent(enemy, front);
       }
     }
   }
 
+  // An enemy landing in the player's front cell - however it got there - is
+  // a face-to-face clash: instant, certain death, no invulnerability window.
+  // An enemy adjacent from the back or a side is a lesser hit that costs a
+  // life instead. Either way the enemy survives; only the boost dash kills.
+  _resolveAdjacent(enemy, front) {
+    if (enemy.gx === front.gx && enemy.gz === front.gz) {
+      this._killPlayer();
+    } else {
+      this._damagePlayer();
+    }
+  }
+
+  _killPlayer() {
+    this.lives = 0;
+    this._updateHud();
+    this._gameOver();
+  }
+
   // Landing a hit never kills the attacker - enemies can never eliminate
-  // each other, and they're never killed just by ending up next to the
-  // player (front included). The boost dash is the only thing that ever
-  // removes an enemy from the board.
+  // each other. The boost dash is the only thing that ever removes an enemy
+  // from the board.
   _damagePlayer() {
     if (this.player.isInvulnerable()) return;
     this.player.flashHit();
