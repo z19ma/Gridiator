@@ -103,6 +103,14 @@ the player takes a front hit or their 3 (back/side) lives run out.
   enemy walking into the front cell on its own with zero player input → instant game over;
   an enemy adjacent from the side → costs exactly 1 life, game continues; boosting a front
   enemy → enemy dies, player takes no damage, game continues.
+- 2026-07-03: Hosted it publicly so it can be shared. GitHub Pages on this account
+  requires a paid plan for private repos (`422: Your current plan does not support GitHub
+  Pages for this repository`), so with the user's explicit OK the repo was made public
+  first (`z19ma/Gridiator` — no secrets in it, just the game). Pages enabled via
+  `gh api POST /repos/z19ma/Gridiator/pages` serving from `master` / root. Added
+  `.nojekyll` since it's a plain static site with no need for GitHub's Jekyll build step.
+  Live at `https://z19ma.github.io/Gridiator/`; redeploys automatically on every push to
+  `master`.
 
 ## Notes
 - Grid is 13x13, player starts centered.
