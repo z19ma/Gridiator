@@ -74,6 +74,11 @@ the run ends when the player's 3 lives run out.
   ignored while paused; walking into a front enemy drops a life, leaves the enemy alive,
   and blocks the player's advance; boosting into the same setup still kills the enemy and
   scores normally.
+- 2026-07-03: The 350ms move cooldown from the previous change made movement feel
+  sluggish (user feedback: "I hate that... as snappy as possible"). Dropped
+  `MOVE_COOLDOWN` to 100ms — enough to prevent an accidental double-fire on one keypress,
+  far below anything perceptible as lag. Verified with Playwright that 150ms-spaced
+  presses each register a distinct move (they would have mostly been dropped at 350ms).
 
 ## Notes
 - Grid is 13x13, player starts centered.
