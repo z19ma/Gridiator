@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gridiator</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="./style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="scene"></canvas>
+
+  <div id="hud">
+    <div id="score-panel">
+      <div>SCORE <span id="score">0</span></div>
+      <div class="dim">BEST <span id="highscore">0</span></div>
+    </div>
+    <div id="lives" class="hearts">♥♥♥</div>
+    <div id="boost-bar"><div id="boost-fill"></div></div>
+  </div>
+
+  <div id="start-screen" class="overlay">
+    <h1>GRIDIATOR</h1>
+    <p><span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> move one grid &mdash; each step is a spear thrust.</p>
+    <p>Press <span class="key">/</span> to boost 3 grids and cut down everything in front of you.</p>
+    <p>Enemies can only kill you from the back or the sides. Keep them on your spear.</p>
+    <p class="prompt">Press any key to begin</p>
+  </div>
+
+  <div id="gameover-screen" class="overlay hidden">
+    <h1>YOU FELL</h1>
+    <p>Score: <span id="final-score">0</span></p>
+    <p>Best: <span id="best-score">0</span></p>
+    <p class="prompt">Press <span class="key">R</span> to restart</p>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
