@@ -53,6 +53,14 @@ other. Score increases per kill; the run ends when the player's 3 lives run out.
   flat shading for a sharp-edged, low-poly look. Re-verified with the same Playwright/
   Edge harness — no console errors, grid/camera/mesh changes confirmed visually via
   screenshot.
+- 2026-07-03: Fixed a restart bug — after dying, the character couldn't move again.
+  `_startGame()` reset `elapsed` back to 0 but never reset `lastMoveTime`, and move
+  input is gated by `elapsed - lastMoveTime < MOVE_COOLDOWN`; since `lastMoveTime` still
+  held the old run's (larger) timestamp, that comparison stayed negative until the new
+  run's `elapsed` climbed back past it — effectively freezing movement for as long as
+  the previous run had lasted. Now `_startGame()` also resets `lastMoveTime = -999`.
+  Verified via a Playwright script that force-triggers game over after simulating a
+  90s run, restarts, and confirms the very next keypress moves the player.
 
 ## Notes
 - Grid is 13x13, player starts centered.

@@ -118,6 +118,7 @@ export class Game {
     this.enemyTickAcc = 0;
     this.spawnAcc = 0;
     this.elapsed = 0;
+    this.lastMoveTime = -999;
 
     if (this.player) this.scene.remove(this.player.group);
     const center = Math.floor(GRID_SIZE / 2);
