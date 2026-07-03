@@ -43,10 +43,13 @@ export class Game {
     this.scene.background = new THREE.Color(0x0e1420);
     this.scene.fog = new THREE.Fog(0x0e1420, 18, 34);
 
-    const d = 12;
+    const d = 10;
     const aspect = window.innerWidth / window.innerHeight;
     this.camera = new THREE.OrthographicCamera(-d * aspect, d * aspect, d, -d, 0.1, 100);
-    this.camera.position.set(14, 14, 14);
+    // Camera sits on the +Z/+Y axes only (no X offset), so the grid reads as an
+    // axis-aligned rectangle rather than a rotated diamond: north/W is "up" on
+    // screen, south/S is "down", west/A is "left", east/D is "right".
+    this.camera.position.set(0, 17, 13);
     this.camera.lookAt(0, 0, 0);
 
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
@@ -74,7 +77,7 @@ export class Game {
   }
 
   _onResize() {
-    const d = 12;
+    const d = 10;
     const aspect = window.innerWidth / window.innerHeight;
     this.camera.left = -d * aspect;
     this.camera.right = d * aspect;
@@ -246,8 +249,10 @@ export class Game {
     }
   }
 
+  // Landing a hit does not kill the attacker — only the player's spear (a
+  // walking thrust, a boost, or an enemy impaling itself on the front cell)
+  // is ever allowed to remove an enemy from the board.
   _damagePlayer(attacker) {
-    attacker.startDeath();
     if (this.player.isInvulnerable()) return;
     this.player.flashHit();
     this.lives -= 1;

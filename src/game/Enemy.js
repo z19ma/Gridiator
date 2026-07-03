@@ -24,31 +24,31 @@ export class Enemy {
   }
 
   _buildMesh() {
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xd94f4f });
-    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, 0.34, 4, 8), bodyMat);
-    body.position.y = 0.4;
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xd94f4f, flatShading: true });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.56, 0.26), bodyMat);
+    body.position.y = 0.36;
     this.group.add(body);
 
     const head = new THREE.Mesh(
-      new THREE.SphereGeometry(0.15, 10, 10),
-      new THREE.MeshStandardMaterial({ color: 0x6b1616 })
+      new THREE.BoxGeometry(0.24, 0.24, 0.24),
+      new THREE.MeshStandardMaterial({ color: 0x6b1616, flatShading: true })
     );
     head.position.y = 0.76;
     this.group.add(head);
 
     const shaft = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.025, 0.025, 1.0, 6),
-      new THREE.MeshStandardMaterial({ color: 0x4a2f18 })
+      new THREE.BoxGeometry(0.05, 0.05, 1.0),
+      new THREE.MeshStandardMaterial({ color: 0x4a2f18, flatShading: true })
     );
-    shaft.rotation.x = Math.PI / 2;
     shaft.position.set(0, 0.5, -0.5);
     this.group.add(shaft);
 
     const tip = new THREE.Mesh(
-      new THREE.ConeGeometry(0.06, 0.22, 8),
-      new THREE.MeshStandardMaterial({ color: 0xbababa, metalness: 0.6, roughness: 0.3 })
+      new THREE.ConeGeometry(0.08, 0.24, 4),
+      new THREE.MeshStandardMaterial({ color: 0xbababa, metalness: 0.6, roughness: 0.3, flatShading: true })
     );
     tip.rotation.x = -Math.PI / 2;
+    tip.rotation.y = Math.PI / 4;
     tip.position.set(0, 0.5, -1.0);
     this.group.add(tip);
   }

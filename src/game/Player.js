@@ -26,32 +26,32 @@ export class Player {
   }
 
   _buildMesh() {
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3fa9f5 });
-    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 0.38, 4, 8), bodyMat);
-    body.position.y = 0.45;
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3fa9f5, flatShading: true });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.62, 0.3), bodyMat);
+    body.position.y = 0.41;
     this.group.add(body);
     this.bodyMesh = body;
 
     const head = new THREE.Mesh(
-      new THREE.SphereGeometry(0.17, 12, 12),
-      new THREE.MeshStandardMaterial({ color: 0xffd8a8 })
+      new THREE.BoxGeometry(0.28, 0.28, 0.28),
+      new THREE.MeshStandardMaterial({ color: 0xffd8a8, flatShading: true })
     );
-    head.position.y = 0.84;
+    head.position.y = 0.86;
     this.group.add(head);
 
     // Spear pivots forward/back for the thrust animation.
     this.spearGroup = new THREE.Group();
-    const shaftMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b });
-    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.25, 6), shaftMat);
-    shaft.rotation.x = Math.PI / 2;
+    const shaftMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, flatShading: true });
+    const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 1.25), shaftMat);
     shaft.position.set(0, 0.55, -0.62);
     this.spearGroup.add(shaft);
 
     const tip = new THREE.Mesh(
-      new THREE.ConeGeometry(0.07, 0.28, 8),
-      new THREE.MeshStandardMaterial({ color: 0xdcdcdc, metalness: 0.6, roughness: 0.3 })
+      new THREE.ConeGeometry(0.09, 0.3, 4),
+      new THREE.MeshStandardMaterial({ color: 0xdcdcdc, metalness: 0.6, roughness: 0.3, flatShading: true })
     );
     tip.rotation.x = -Math.PI / 2;
+    tip.rotation.y = Math.PI / 4;
     tip.position.set(0, 0.55, -1.25);
     this.spearGroup.add(tip);
 
