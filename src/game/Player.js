@@ -58,12 +58,6 @@ export class Player {
     this.group.add(this.spearGroup);
   }
 
-  /** Front cell coordinates given current facing. */
-  frontCell() {
-    const d = DIRECTIONS[this.facing];
-    return { gx: this.gx + d.dx, gz: this.gz + d.dz };
-  }
-
   setFacing(direction) {
     this.facing = direction;
   }

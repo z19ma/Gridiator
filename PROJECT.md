@@ -7,15 +7,13 @@ screen, south/S is down, west/A is left, east/D is right). The character can onl
 grid cells and always carries a spear. Every `WASD` press is one grid-step attempt *and*
 a spear thrust in that direction, gated by a "reload" cooldown between moves; `/` triggers
 a boost (its own separate cooldown) that dashes 3 grid cells and kills every enemy in that
-line. Enemies spawn endlessly from the grid's edges and path toward the player. Combat is
-asymmetric by direction: enemies can only land a hit on the player from the back or sides;
-if one ends up directly in front of the spear it dies (self-impale). But a player-initiated
-walking thrust straight into an enemy standing in front is a losing clash — it costs the
-player a life and the enemy survives — only the boosted dash safely kills an enemy head-on.
-Landing a hit never kills the attacker, and nothing but the player's spear or an enemy's
-own front-cell self-impale ever removes an enemy — enemies never kill each other. `ESC`
-pauses/resumes (freezes the game clock, enemy AI, and spawning). Score increases per kill;
-the run ends when the player's 3 lives run out.
+line. Enemies spawn endlessly from the grid's edges and path toward the player. Combat has
+no safe direction: any adjacency between the player and an enemy — front, back, or side,
+whether the player walked into the enemy or the enemy walked into the player — costs the
+player a life. The boost dash is the *only* thing that ever kills an enemy; landing a hit
+never kills the attacker, and enemies never kill each other. `ESC` pauses/resumes (freezes
+the game clock, enemy AI, and spawning). Score only comes from boost kills; the run ends
+when the player's 3 lives run out.
 
 ## Stack
 - Vanilla JS ES modules, Three.js loaded via CDN import map (`unpkg`) — **no build step,
@@ -34,10 +32,10 @@ the run ends when the player's 3 lives run out.
 - `src/game/Enemy.js` — enemy mesh (same sharp-edged box style), movement tweening,
   death (shrink) animation.
 - `src/game/Game.js` — the whole game loop: Three.js scene/camera/renderer setup, input
-  handling, player move/boost resolution, enemy spawning, enemy AI (greedy step toward
-  player that avoids the player's front cell when possible), combat resolution, scoring,
-  lives, difficulty ramp over time, HUD updates, game state machine
-  (`start` → `playing` → `gameover`).
+  handling, player move/boost resolution, enemy spawning, enemy AI (plain greedy step
+  toward the player, no front-cell avoidance since front is no longer safe for them),
+  combat resolution, scoring, lives, difficulty ramp over time, HUD updates, game state
+  machine (`start` → `playing` → `paused` → `gameover`).
 
 ## Status
 - 2026-07-03: Repo initialized (empty).
@@ -79,6 +77,17 @@ the run ends when the player's 3 lives run out.
   `MOVE_COOLDOWN` to 100ms — enough to prevent an accidental double-fire on one keypress,
   far below anything perceptible as lag. Verified with Playwright that 150ms-spaced
   presses each register a distinct move (they would have mostly been dropped at 350ms).
+- 2026-07-03: User pointed out the front-cell rule was only half-fixed — `_stepEnemyAI`
+  still let an enemy that walked itself into the player's front cell die for free
+  (self-impale via `_resolveAdjacent`), instead of damaging the player, whenever the
+  *enemy* (not the player) initiated the contact. Removed that entirely: any adjacency
+  now always calls `_damagePlayer()`, with no front-cell special case. Also dropped the
+  now-pointless "avoid the front cell" bias from the AI's pathing (front isn't dangerous
+  for enemies anymore, so there's no reason for them to dodge it), and removed the
+  now-dead `SCORE_NORMAL_KILL` constant and `Player.frontCell()` method — the boost dash
+  is the only remaining kill path. Verified with Playwright: an enemy placed directly in
+  front of the player with zero player input still damages the player (not itself) on the
+  next AI tick and survives; boosting into the same setup still kills it and scores.
 
 ## Notes
 - Grid is 13x13, player starts centered.

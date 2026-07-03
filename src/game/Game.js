@@ -4,7 +4,6 @@ import { Player } from './Player.js';
 import { Enemy } from './Enemy.js';
 
 const LIVES_START = 3;
-const SCORE_NORMAL_KILL = 10;
 const SCORE_BOOST_KILL = 15;
 const BOOST_RANGE = 3;
 const BOOST_COOLDOWN = 1.4;
@@ -232,7 +231,6 @@ export class Game {
 
   _stepEnemyAI() {
     const p = this.player;
-    const front = p.frontCell();
     const occupied = new Set(this.enemies.filter((e) => !e.dying).map((e) => `${e.gx},${e.gz}`));
 
     for (const enemy of [...this.enemies]) {
@@ -241,8 +239,11 @@ export class Game {
       const dgx = p.gx - enemy.gx;
       const dgz = p.gz - enemy.gz;
 
+      // Adjacent on any side - front, back, or flank - lands a hit on the
+      // player. There's no safe direction to be caught next to an enemy;
+      // the boost dash is the only way to clear one out.
       if (Math.abs(dgx) + Math.abs(dgz) === 1) {
-        this._resolveAdjacent(enemy, front);
+        this._damagePlayer();
         continue;
       }
 
@@ -252,9 +253,7 @@ export class Game {
       stepOptions.sort((a, b) => b.dist - a.dist || Math.random() - 0.5);
 
       const isFree = (s) => inBounds(s.gx, s.gz) && !occupied.has(`${s.gx},${s.gz}`);
-      const nonFront = stepOptions.filter((s) => isFree(s) && !(s.gx === front.gx && s.gz === front.gz));
-      const anyFree = stepOptions.filter(isFree);
-      const chosen = nonFront[0] || anyFree[0];
+      const chosen = stepOptions.find(isFree);
       if (!chosen) continue;
 
       occupied.delete(`${enemy.gx},${enemy.gz}`);
@@ -262,22 +261,15 @@ export class Game {
       occupied.add(`${chosen.gx},${chosen.gz}`);
 
       if (Math.abs(p.gx - chosen.gx) + Math.abs(p.gz - chosen.gz) === 1) {
-        this._resolveAdjacent(enemy, front);
+        this._damagePlayer();
       }
     }
   }
 
-  _resolveAdjacent(enemy, front) {
-    if (enemy.gx === front.gx && enemy.gz === front.gz) {
-      this._killEnemy(enemy, SCORE_NORMAL_KILL);
-    } else {
-      this._damagePlayer();
-    }
-  }
-
   // Landing a hit never kills the attacker - enemies can never eliminate
-  // each other. An enemy is only ever removed by the player's boost dash,
-  // or by wandering onto the player's stationary front-cell spear tip.
+  // each other, and they're never killed just by ending up next to the
+  // player (front included). The boost dash is the only thing that ever
+  // removes an enemy from the board.
   _damagePlayer() {
     if (this.player.isInvulnerable()) return;
     this.player.flashHit();

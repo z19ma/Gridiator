@@ -21,9 +21,9 @@ Then open http://localhost:8000 in a browser.
 
 ## Rules
 
-- Enemies can only kill you by reaching your back or sides. If one ends up directly in front of your spear, it dies instead (self-impale).
-- Walking straight into an enemy standing in front of you is a clash you lose — it costs a life and the enemy survives. Only the boost dash safely kills an enemy head-on.
-- Enemies never kill each other — the only thing that removes an enemy is your spear (boost) or its own front-cell self-impale.
+- Any enemy adjacent to you — front, back, or side, whether it walked into you or you walked into it — costs you a life. There's no safe direction to be caught next to one.
+- The boost dash is the only thing that ever kills an enemy. Walking a normal thrust into one just costs you a life instead (and blocks your advance).
+- Enemies never kill each other.
 - Enemies spawn continuously from the grid's edges and get faster/more frequent the longer you survive.
-- Score: +10 for a self-impale kill, +15 for a boost kill. High score is saved locally in the browser.
+- Score: +15 per boost kill (the only way to score). High score is saved locally in the browser.
 - You have 3 lives; losing all of them ends the run.
